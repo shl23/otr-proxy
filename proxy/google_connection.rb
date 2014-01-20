@@ -387,7 +387,7 @@ XML
         msg = otr[:self_impl].transformReceiving(otr[:self_session], body)
 
         # Encryption status changed
-        if otr[:self_impl].getSessionStatus(otr[:self_session]) != ENCRYPTED
+        if !msg || otr[:self_impl].getSessionStatus(otr[:self_session]) != ENCRYPTED
           debug "*** OTR LINK SEVERED for #{sender}/#{receiver}"
 
           @otr_states.delete(sender)
