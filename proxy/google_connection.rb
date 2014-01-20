@@ -343,8 +343,6 @@ XML
     sender, receiver = self.extract_targets(doc)
     return true unless sender
 
-    raise "TEST"
-
     @otr_mutex.synchronize do
       otr = @otr_states[sender] || {}
       if !@otr_fast_conn[sender] && otr.empty? && @keystore.hasPairByAddresses?(receiver, sender)
