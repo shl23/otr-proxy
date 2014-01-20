@@ -30,6 +30,10 @@ class GoogleConnection
       parse_message(@local, @remote, :local)
     end
 
+  rescue EOFError => ex
+    puts "[OK] #{ex.class}: #{ex.message}"
+    puts ex.backtrace
+
   rescue Exception => ex
     self.handle_error(ex)
   end
@@ -38,6 +42,10 @@ class GoogleConnection
     while true do
       parse_message(@remote, @local, :remote)
     end
+
+  rescue EOFError => ex
+    puts "[OK] #{ex.class}: #{ex.message}"
+    puts ex.backtrace
 
   rescue Exception => ex
     self.handle_error(ex)
