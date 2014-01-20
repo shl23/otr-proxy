@@ -4,6 +4,7 @@ class GoogleConnection
   ENCRYPTED = Java::NetJavaOtr4jSession::SessionStatus::ENCRYPTED
 
   attr_reader :keystore
+  trap_exit :close_connections
 
   def initialize(conn, server, port)
     debug "* Connecting to proxy target #{server}:#{port}"
@@ -28,12 +29,34 @@ class GoogleConnection
     while true do
       parse_message(@local, @remote, :local)
     end
+
+  rescue Exception => ex
+    self.handle_error(ex)
   end
 
   def handle_remote
     while true do
       parse_message(@remote, @local, :remote)
     end
+
+  rescue Exception => ex
+    self.handle_error(ex)
+  end
+
+  def handle_error(ex)
+    puts
+    puts "#{ex.class}: #{ex.message}"
+    puts ex.backtrace
+
+    close_connections
+    Celluloid.shutdown
+  end
+
+  def close_connections
+    puts "** Closing connections"
+
+    @remote.close rescue nil
+    @local.close rescue nil
   end
 
   # Message handling
@@ -328,7 +351,7 @@ XML
       debug "** Handling OTR for #{sender} (receiver #{receiver}), state #{otr[:state]}, v#{otr[:version]}"
 
       # We sent a confirmation on OTR to them got the commit back and now sent the DH Key
-      if otr[:state] == :handshake or otr[:state] == :dh_key
+      if otr[:state] == :handshake || otr[:state] == :dh_key
         otr[:state] = otr[:state] == :handshake ? :dh_key : :authed
         otr[:fully_encrypted] = true if otr[:authed]
 
@@ -339,7 +362,7 @@ XML
         @otr_fast_conn.delete(sender)
 
         # Report the keys we're using
-        if otr[:state] == :authed and !otr[:fully_encrypted]
+        if otr[:state] == :authed && !otr[:fully_encrypted]
           otr[:fully_encrypted] = true
 
           # Output fingerprints

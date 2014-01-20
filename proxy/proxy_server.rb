@@ -7,11 +7,7 @@ class ProxyServer
   end
 
   def handle_connection(conn)
-    puts "** Handling #{conn.inspect}"
-    GoogleConnection.new(conn, "talk.google.com", "5223")
-
-  rescue EOFError => e
-    puts "EOF: #{e.message}"
+    GoogleConnection.supervise(conn, "talk.google.com", "5223")
   end
 
   def run
