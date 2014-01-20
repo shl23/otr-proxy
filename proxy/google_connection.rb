@@ -261,6 +261,11 @@ class GoogleConnection
           self.initialize_otr(receiver, sender)
         end
 
+      # End OTR
+      elsif body == "!stopotr"
+        self.reset_typing_status(@remote, receiver)
+        @otr_states.delete(receiver)
+
       # Encrypt our message
       elsif otr
         msg = otr[:self_impl].transformSending(otr[:self_session], body)
