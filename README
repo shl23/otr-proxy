@@ -1,0 +1,3 @@
+Quick weekend project for an OTR proxy that can be used with iMessage, currently a giant hack.
+
+Uses the https://github.com/jitsi/otr4j for the OTR encryption.
