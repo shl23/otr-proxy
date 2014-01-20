@@ -208,7 +208,7 @@ class GoogleConnection
       otr = self.find_session(receiver)
 
       # See active fingerprint
-      if body == "!fp"
+      if body == "#fp"
         self.reset_typing_status(@remote, receiver)
 
         if otr
@@ -218,7 +218,7 @@ class GoogleConnection
         end
 
       # See our fingerprint
-      elsif body == "!myfp"
+      elsif body == "#myfp"
         self.reset_typing_status(@remote, receiver)
 
         if otr
@@ -236,7 +236,7 @@ class GoogleConnection
         self.send_raw(@local, self.construct_chat(receiver, sender, msg))
 
       # Verify it as good
-      elsif body == "!verify"
+      elsif body == "#verify"
         self.reset_typing_status(@remote, receiver)
 
         if otr
@@ -246,12 +246,12 @@ class GoogleConnection
         end
 
       # Check we're running
-      elsif body == "!ping"
+      elsif body == "#ping"
         self.reset_typing_status(@remote, receiver)
         self.send_raw(@local, self.construct_chat(receiver, sender, "pong"))
 
       # Start OTR
-      elsif body == "!otr"
+      elsif body == "#otr"
         self.reset_typing_status(@remote, receiver)
 
         if otr
@@ -262,9 +262,18 @@ class GoogleConnection
         end
 
       # End OTR
-      elsif body == "!stopotr"
+      elsif body == "#stopotr"
         self.reset_typing_status(@remote, receiver)
-        @otr_states.delete(receiver)
+
+        if otr
+          otr[:self_impl].endSession(otr[:self_session])
+          self.send_simple(@remote, receiver, @otr_engine.last_injection)
+
+          @otr_states.delete_if {|key, value| value == otr}
+          self.send_raw(@local, self.construct_chat(receiver, sender, "[OTR] Connection severed"))
+        else
+          self.send_raw(@local, self.construct_chat(receiver, sender, "[OTR] We're not currently using OTR"))
+        end
 
       # Encrypt our message
       elsif otr
