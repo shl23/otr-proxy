@@ -1,3 +1,5 @@
+File.open("/tmp/otr-proxy.pid", "w+") {|f| f.write(Process.pid)}
+
 require "celluloid"
 require "celluloid/io"
 require "nokogiri"

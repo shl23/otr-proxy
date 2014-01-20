@@ -245,6 +245,11 @@ class GoogleConnection
           self.send_raw(@local, self.construct_chat(receiver, sender, "[No OTR] Cannot verify as we are not running through OTR."))
         end
 
+      # Check we're running
+      elsif body == "!ping"
+        self.reset_typing_status(@remote, receiver)
+        self.send_raw(@local, self.construct_chat(receiver, sender, "pong"))
+
       # Start OTR
       elsif body == "!otr"
         self.reset_typing_status(@remote, receiver)

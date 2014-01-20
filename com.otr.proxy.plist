@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC -//Apple Computer//DTD PLIST 1.0//EN http://www.apple.com/DTDs/PropertyList-1.0.dtd >
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.otr.proxy</string>
+    <key>WorkingDirectory</key>
+    <string>~/Desktop/ruby-otr-proxy</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>~/.rvm/bin/otr_ruby</string>
+        <string>initializer.rb</string>
+    </array>
+    <key>StandardErrorPath</key>
+    <string>/tmp/otr-proxy.log</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/otr-proxy.log</string>
+    <key>KeepAlive</key>
+    <true/>
+  </dict>
+</plist>
