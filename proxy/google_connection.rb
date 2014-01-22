@@ -16,12 +16,16 @@ class GoogleConnection
     @otr_mutex = Mutex.new
 
     @local = conn
+    @server, @port = server, port
 
-    @remote = SSLSocket.new(TCPSocket.new(server, port))
-    @remote.connect
-
+    open_remote_conn
     async.handle_local
     async.handle_remote
+  end
+
+  def open_remote_conn
+    @remote = SSLSocket.new(TCPSocket.new(@server, @port))
+    @remote.connect
   end
 
   # Proxies
@@ -34,8 +38,9 @@ class GoogleConnection
     puts "[OK] #{ex.class}: #{ex.message}"
     puts ex.backtrace
 
-  rescue Exception => ex
-    self.handle_error(ex)
+  rescue Exception
+    @local.close rescue nil
+    raise
   end
 
   def handle_remote
@@ -43,12 +48,18 @@ class GoogleConnection
       parse_message(@remote, @local, :remote)
     end
 
-  rescue EOFError => ex
-    puts "[OK] #{ex.class}: #{ex.message}"
-    puts ex.backtrace
-
   rescue Exception => ex
-    self.handle_error(ex)
+    puts
+    puts "#{ex.class}: #{ex.message}"
+    puts ex.backtrace
+    puts
+    puts "* Reconnecting..."
+
+    sleep 1
+
+    @remote.close rescue nil
+    open_remote_conn
+    retry
   end
 
   def handle_error(ex)
@@ -60,7 +71,7 @@ class GoogleConnection
     Celluloid.shutdown
   end
 
-  def close_connections
+  def close_connections(*args)
     puts "** Closing connections"
 
     @remote.close rescue nil
@@ -444,7 +455,7 @@ XML
 <message type="chat" id="#{self.generateMsgID}" to="#{to}"#{from ? " from=\"#{from}\"" : ""}><active xmlns="http://jabber.org/protocol/chatstates"/><body>#{msg}</body></message>
 XML
     data.strip!
-    data.force_encoding(Encoding::ASCII_8BIT)
+    data.force_encoding("UTF-8")
   end
 
   def send_message(target, doc, msg)
