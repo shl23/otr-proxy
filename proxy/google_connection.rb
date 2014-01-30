@@ -467,6 +467,13 @@ XML
 
     verbose "[out #{target == @local ? :local : :remote}] #{msg}"
     target.write(msg)
+
+  rescue Encoding::UndefinedConversionError => e
+    puts "ENCODING #{e.class}, #{e.message}"
+    puts e.backtrace
+    puts doc.inspect
+    puts msg.inspect
+    puts target.inspect
   end
 
   def send_simple(target, sent_from, msg)
