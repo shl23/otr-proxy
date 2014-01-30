@@ -429,7 +429,6 @@ XML
         # Decrypted
         elsif msg != body
           # Fix bad Adium that sends <FONT> tags
-          msg = msg.gsub(/<FONT>|<\/FONT>/, "")
           self.send_message(@local, doc, "[+] " << msg)
 
         # Failed to decrypt
@@ -458,12 +457,16 @@ XML
     data.force_encoding("UTF-8")
   end
 
-  def send_message(target, doc, msg)
+  def send_message(target, doc, text)
     # Replace message with unencrypted version
     body = doc.xpath("/message//body").first
-    body.content = msg
+    # Nokogiri escapes HTML, which we don't want in this case
+    body.content = "***MARK***"
 
     msg = doc.to_xml.split("\n", 2).last
+    msg = msg.gsub("<body>", '<html xmlns="http://jabber.org/protocol/xhtml-im"><body xmlns="http://www.w3.org/1999/xhtml">')
+    msg = msg.gsub("</body>", "</body></html>")
+    msg = msg.gsub('***MARK***', CGI::unescapeHTML(text))
 
     verbose "[out #{target == @local ? :local : :remote}] #{msg}"
     target.write(msg)

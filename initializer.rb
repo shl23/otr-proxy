@@ -7,6 +7,7 @@ require "securerandom"
 require "fileutils"
 require "yaml"
 require "digest/sha2"
+require "cgi"
 
 require "otr4j-bc147.jar"
 
