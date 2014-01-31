@@ -2,7 +2,7 @@ class ProxyServer
   include Celluloid::IO
 
   def initialize
-    @server = TCPServer.new(8080)
+    @server = TCPServer.new(ENV["TEST"] == "1" ? 8081 : 8080)
     async.run
   end
 

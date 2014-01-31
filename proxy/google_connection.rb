@@ -458,6 +458,10 @@ XML
   end
 
   def send_message(target, doc, text)
+    # Fix malformed font tags in Adium causing a crash (malformed to Message standards)
+    text = text.gsub(/ABSZ=([0-9]+)/, 'ABSZ="\1"')
+    text = text.gsub(/SIZE=([0-9]+)/, 'SIZE="\1"')
+
     # Replace message with unencrypted version
     body = doc.xpath("/message//body").first
     # Nokogiri escapes HTML, which we don't want in this case
@@ -466,7 +470,7 @@ XML
     msg = doc.to_xml.split("\n", 2).last
     msg = msg.gsub("<body>", '<html xmlns="http://jabber.org/protocol/xhtml-im"><body xmlns="http://www.w3.org/1999/xhtml">')
     msg = msg.gsub("</body>", "</body></html>")
-    msg = msg.gsub('***MARK***', CGI::unescapeHTML(text))
+    msg = msg.gsub('***MARK***', text)
 
     verbose "[out #{target == @local ? :local : :remote}] #{msg}"
     target.write(msg)
